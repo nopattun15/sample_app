@@ -1,7 +1,5 @@
 class UsersController < ApplicationController
   attr_accessor :remember_token, :activation_token
-  before_save :downcase_email
-  before_create :create_activation_digest
   before_action :logged_in_user, only: [:index, :edit, :update]
   before_action :correct_user, only: [:edit, :update]
   before_action :admin_user, only: :destroy
@@ -22,9 +20,9 @@ class UsersController < ApplicationController
   def create
     @user = User.new(user_params)
     if @user.save
-      log_in @user
-      redirect_to @user
-      flash[:success] = "Welcome to the Sample App!"
+      UserMailer.account_activation(@user).deliver_now
+      flash[:info] = "Please check your email to activate your account."
+      redirect_to root_url
     else
       render 'new'
     end
